@@ -60,14 +60,19 @@ func programInput(filePath string) (io.Reader, error) {
 // Asynchronously run the program with the given arguments for each of the
 // lines of input grabbed from `programInput`.
 func runJobs(program string, args []string, concurrency int) {
-	wg := sync.WaitGroup{}
-	sem := make(chan struct{}, concurrency)
 	reader, err := programInput(*argsFile)
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Could not read from input:", err.Error())
 		os.Exit(1)
 	}
+	runJobsFromReader(program, args, concurrency, reader)
+}
+
+// This is the actual worker used in `runJobs`.
+func runJobsFromReader(program string, args []string, concurrency int, reader io.Reader) {
+	wg := sync.WaitGroup{}
+	sem := make(chan struct{}, concurrency)
 	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
