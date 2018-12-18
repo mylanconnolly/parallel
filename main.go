@@ -30,7 +30,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Must specify a command to execute")
 		os.Exit(1)
 	}
-	runJobs(program, *jobs, programArgs)
+	runJobs(program, programArgs, *jobs)
 }
 
 // This function pulls double-duty by accepting the positional arguments from
@@ -59,7 +59,7 @@ func programInput(filePath string) (io.Reader, error) {
 
 // Asynchronously run the program with the given arguments for each of the
 // lines of input grabbed from `programInput`.
-func runJobs(program string, concurrency int, args []string) {
+func runJobs(program string, args []string, concurrency int) {
 	wg := sync.WaitGroup{}
 	sem := make(chan struct{}, concurrency)
 	reader, err := programInput(*argsFile)
