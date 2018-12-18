@@ -39,9 +39,9 @@ func parseArgs(args []string) (program string, programArgs []string, ok bool) {
 	}
 }
 
-func programInput() (io.Reader, error) {
-	if argsFile != nil && *argsFile != "" {
-		return os.Open(*argsFile)
+func programInput(filePath string) (io.Reader, error) {
+	if filePath != "" {
+		return os.Open(filePath)
 	}
 	return os.Stdin, nil
 }
@@ -49,7 +49,7 @@ func programInput() (io.Reader, error) {
 func runJobs(program string, args []string) {
 	wg := sync.WaitGroup{}
 	sem := make(chan struct{}, *jobs)
-	reader, err := programInput()
+	reader, err := programInput(*argsFile)
 
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Could not read from input:", err.Error())
