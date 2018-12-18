@@ -73,12 +73,15 @@ func lineReader(reader io.Reader) <-chan string {
 	scanner := bufio.NewScanner(reader)
 	ch := make(chan string)
 
+	// Set the split function (scan per line)
+	scanner.Split(bufio.ScanLines)
+
 	go func() {
+		defer close(ch)
+
 		for scanner.Scan() {
 			ch <- scanner.Text()
 		}
-		close(ch)
-
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, err.Error())
 		}
