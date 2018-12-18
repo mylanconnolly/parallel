@@ -20,6 +20,10 @@ var (
 func main() {
 	flag.Parse()
 
+	if len(os.Args) == 1 {
+		fmt.Fprintf(os.Stderr, "Usage: %s [-j num] [-a path] program", os.Args[0])
+		os.Exit(1)
+	}
 	program, programArgs, ok := parseArgs(flag.Args())
 
 	if !ok {
