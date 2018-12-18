@@ -17,6 +17,7 @@ Usage is similar to GNU parallel:
 ```bash
 find /etc -type f | parallel md5sum      # Example to MD5 sum all files in /etc, using all cores
 find /etc -type f | parallel -j 2 md5sum # Example to MD5 sum all files in /etc, using 2 cores
+parallel -a lines.txt md5sum             # Like example 1, except using lines.txt as input, instead of stdin.
 ```
 
 ## TODO
