@@ -106,11 +106,15 @@ func runJobsFromReader(program string, args []string, concurrency int, reader io
 
 // This function actually executes the program and prints the output from the
 // command.
-func runJob(program, line string, args []string, sem <-chan struct{}, wg *sync.WaitGroup) error {
+func runJob(program, line string, args []string, sem <-chan struct{}, wg *sync.WaitGroup) {
 	defer wg.Done()          // Decrement waitgroup
 	defer func() { <-sem }() // Release semaphore
 
 	output, err := exec.Command(program, append(args, line)...).CombinedOutput()
-	fmt.Print(string(output))
-	return err
+
+	fmt.Fprint(os.Stdout, string(output))
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Error encountered:", err.Error())
+	}
 }
