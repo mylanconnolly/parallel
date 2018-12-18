@@ -11,6 +11,7 @@ import (
 	"sync"
 )
 
+// Command-line arguments
 var (
 	jobs     = flag.Int("j", runtime.NumCPU(), "The maximum number of jobs to run. By default, the number of logical cores on the local machine.")
 	argsFile = flag.String("a", "", "Path to args file. If exists, will read lines from file instead of STDIN.")
