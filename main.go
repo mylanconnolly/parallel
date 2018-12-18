@@ -4,13 +4,17 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"runtime"
 	"sync"
 )
 
-var jobs = flag.Int("j", runtime.NumCPU(), "The maximum number of jobs to run. By default, the number of logical cores on the local machine.")
+var (
+	jobs     = flag.Int("j", runtime.NumCPU(), "The maximum number of jobs to run. By default, the number of logical cores on the local machine.")
+	argsFile = flag.String("a", "", "Path to args file. If exists, will read lines from file instead of STDIN.")
+)
 
 func main() {
 	flag.Parse()
@@ -35,10 +39,23 @@ func parseArgs(args []string) (program string, programArgs []string, ok bool) {
 	}
 }
 
+func programInput() (io.Reader, error) {
+	if argsFile != nil && *argsFile != "" {
+		return os.Open(*argsFile)
+	}
+	return os.Stdin, nil
+}
+
 func runJobs(program string, args []string) {
 	wg := sync.WaitGroup{}
 	sem := make(chan struct{}, *jobs)
-	scanner := bufio.NewScanner(os.Stdin)
+	reader, err := programInput()
+
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Could not read from input:", err.Error())
+		os.Exit(1)
+	}
+	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
 		wg.Add(1)
