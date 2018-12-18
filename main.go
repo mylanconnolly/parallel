@@ -28,6 +28,10 @@ func main() {
 	runJobs(program, programArgs)
 }
 
+// This function pulls double-duty by accepting the positional arguments from
+// the command line and splitting it into the program name and any arguments
+// for the program. If the input slice is empty, the `ok` value is false, to
+// indicate that the user needs to pass a command.
 func parseArgs(args []string) (program string, programArgs []string, ok bool) {
 	switch len(args) {
 	case 0:
@@ -39,6 +43,8 @@ func parseArgs(args []string) (program string, programArgs []string, ok bool) {
 	}
 }
 
+// If the input is not empty, assume that it is a file and attempt to open it.
+// Otherwise, return os.Stdin as the reader.
 func programInput(filePath string) (io.Reader, error) {
 	if filePath != "" {
 		return os.Open(filePath)
@@ -46,6 +52,8 @@ func programInput(filePath string) (io.Reader, error) {
 	return os.Stdin, nil
 }
 
+// Asynchronously run the program with the given arguments for each of the
+// lines of input grabbed from `programInput`.
 func runJobs(program string, args []string) {
 	wg := sync.WaitGroup{}
 	sem := make(chan struct{}, *jobs)
@@ -78,6 +86,8 @@ func runJobs(program string, args []string) {
 	wg.Wait()
 }
 
+// This function actually executes the program and prints the output from the
+// command.
 func runJob(program, input string, args []string) error {
 	output, err := exec.Command(program, append(args, input)...).CombinedOutput()
 	fmt.Print(string(output))
