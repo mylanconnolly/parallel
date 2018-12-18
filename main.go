@@ -69,37 +69,45 @@ func runJobs(program string, args []string, concurrency int) {
 	runJobsFromReader(program, args, concurrency, reader)
 }
 
+func lineReader(reader io.Reader) <-chan string {
+	scanner := bufio.NewScanner(reader)
+	ch := make(chan string)
+
+	go func() {
+		for scanner.Scan() {
+			ch <- scanner.Text()
+		}
+		close(ch)
+
+		if err := scanner.Err(); err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+		}
+	}()
+
+	return ch
+}
+
 // This is the actual worker used in `runJobs`.
 func runJobsFromReader(program string, args []string, concurrency int, reader io.Reader) {
 	wg := sync.WaitGroup{}
 	sem := make(chan struct{}, concurrency)
-	scanner := bufio.NewScanner(reader)
+	lines := lineReader(reader)
 
-	for scanner.Scan() {
-		wg.Add(1)
-		sem <- struct{}{}
-		input := scanner.Text()
-
-		go func() {
-			defer wg.Done()
-			defer func() { <-sem }()
-
-			if err := runJob(program, input, args); err != nil {
-				fmt.Fprintln(os.Stderr, "Error encountered running command:", err.Error())
-			}
-		}()
-	}
-	if err := scanner.Err(); err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
+	for line := range lines {
+		wg.Add(1)         // Increment waitgroup
+		sem <- struct{}{} // Acquire semaphore
+		go runJob(program, line, args, sem, &wg)
 	}
 	wg.Wait()
 }
 
 // This function actually executes the program and prints the output from the
 // command.
-func runJob(program, input string, args []string) error {
-	output, err := exec.Command(program, append(args, input)...).CombinedOutput()
+func runJob(program, line string, args []string, sem <-chan struct{}, wg *sync.WaitGroup) error {
+	defer wg.Done()          // Decrement waitgroup
+	defer func() { <-sem }() // Release semaphore
+
+	output, err := exec.Command(program, append(args, line)...).CombinedOutput()
 	fmt.Print(string(output))
 	return err
 }
