@@ -33,9 +33,8 @@ $ find /etc -type f | parallel -t 'cp {{.Input}} {{.Input}}.{{.Start.Format "200
 Maybe you need to use an input file as your source:
 
 ```shell
-# Maybe you want to send out a bunch of spam emails using a text file of email
-# addresses? (please don't do this)
-parallel -a ./emails.txt -t 'echo "Subject: YOU GOT SPAM" | sendmail {{.Input}}'
+# Maybe you want to calculate the MD5 sum of all the files in a text file.
+parallel -a ./files.txt -t 'md5sum {{.Input}}'
 ```
 
 The following fields are available when using templates:
