@@ -14,6 +14,8 @@ type writer struct {
 }
 
 func newWriter(w io.Writer) *writer {
+	// Buffer the output in case the writer cannot keep up (maybe a slow terminal
+	// or over SSH or something?)
 	return &writer{writer: bufio.NewWriter(w)}
 }
 

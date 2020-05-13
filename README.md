@@ -7,6 +7,8 @@ a tool that I regularly use.
 The tool will start a worker for each CPU and work through the list of jobs that
 you give it. The amount of workers is configurable.
 
+This tool is striving to only use stdlib packages.
+
 ## Usage
 
 Install using `go get github.com/mylanconnolly/parallel` or some other means.
@@ -48,3 +50,12 @@ The following fields are available when using templates:
 
 For more general information about Go templates, check
 [here](https://golang.org/pkg/text/template/#pkg-overview).
+
+## TODO
+
+On both of my machines (One 6-core Core i7-8700K and one 4-core Ryzen 7 2700U)
+performance seems to peak at a concurrency level of 4. I would like to hunt down
+the cause of this bottleneck.
+
+GNU Parallel supports building pipelines in its templating language. I would
+like to emulate this, but I feel like it would add a fair amount of complexity.
