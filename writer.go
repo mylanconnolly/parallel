@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"io"
 	"sync"
 )
@@ -13,7 +14,7 @@ type writer struct {
 }
 
 func newWriter(w io.Writer) *writer {
-	return &writer{writer: w}
+	return &writer{writer: bufio.NewWriter(w)}
 }
 
 // Write is used to implement `io.Writer`
