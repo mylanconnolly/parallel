@@ -45,13 +45,13 @@ func main() {
 	if len(args) > 1 {
 		programArgs = args[1:]
 	}
+	cmd := getCmd(args)
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
-	c := make(chan os.Signal, 1)
-	cmd := ""
 
-	if len(args) > 0 {
-		cmd = args[0]
+	if cmd == "" && *template == "" {
+		fmt.Fprintln(os.Stderr, "Must provide a command or command template")
+		os.Exit(1)
 	}
 	w, err := NewWorkerPool(
 		ctx,
@@ -68,6 +68,9 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
+	// Check for SIGINT and attempt to tell all jobs to cancel. If the user sends
+	// another SIGINT then just forcefully quit.
+	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 
 	go func() {
@@ -77,7 +80,19 @@ func main() {
 		<-c
 		os.Exit(130)
 	}()
+
+	// Start the worker process.
 	w.run()
+}
+
+// If the args slice has at least one value then the first value would be the
+// command to run. If there isn't anything in it, then just return an empty
+// string. Presumably the template will be provided if there is no command.
+func getCmd(args []string) string {
+	if len(args) > 0 {
+		return args[0]
+	}
+	return ""
 }
 
 func getInput(argFile string) (io.Reader, error) {
