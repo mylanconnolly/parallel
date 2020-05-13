@@ -61,19 +61,19 @@ Below is the timing for the GNU version:
 
 ```
 $ time find ~/src/go -type f | parallel md5sum > /dev/null
-... output elided ...
-parallel md5sum > /dev/null  22.70s user 43.62s system 239% cpu 27.667 total
+noglob find ~/src/go -type f  0.01s user 0.07s system 0% cpu 22.580 total
+parallel md5sum > /dev/null  22.65s user 42.48s system 246% cpu 26.432 total
 ```
 
 Below is the timing for this version:
 
 ```
 $ time find ~/src/go -type f | ./parallel md5sum > /dev/null
-... output elided ...
-./parallel md5sum > /dev/null  8.06s user 3.11s system 333% cpu 3.344 total
+noglob find ~/src/go -type f  0.02s user 0.05s system 3% cpu 1.845 total
+./parallel md5sum > /dev/null  7.46s user 2.72s system 396% cpu 2.569 total
 ```
 
-In this example it took GNU parallel around 8 times longer to complete the same
+In this example it took GNU parallel around 10 times longer to complete the same
 amount of work.
 
 A few notes on my test environment:

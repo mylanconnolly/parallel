@@ -17,8 +17,8 @@ type WorkerPool struct {
 	cmd         string
 	concurrency int
 	ctx         context.Context
-	err         io.Writer
-	out         io.Writer
+	err         *writer
+	out         *writer
 	queue       queue
 	runner      func(line string)
 	start       time.Time
@@ -80,6 +80,8 @@ func (w *WorkerPool) run() {
 		go w.startWorker(&wg)
 	}
 	wg.Wait()
+	w.out.Flush()
+	w.err.Flush()
 }
 
 func (w *WorkerPool) startWorker(wg *sync.WaitGroup) {
@@ -90,7 +92,7 @@ func (w *WorkerPool) startWorker(wg *sync.WaitGroup) {
 		select {
 		case <-w.ctx.Done():
 			return
-		case line, open := <- w.queue.ch:
+		case line, open := <-w.queue.ch:
 			if !open {
 				return
 			}
