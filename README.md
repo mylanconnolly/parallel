@@ -51,6 +51,35 @@ The following fields are available when using templates:
 For more general information about Go templates, check
 [here](https://golang.org/pkg/text/template/#pkg-overview).
 
+## Real world examples:
+
+Here are some benchmarks using the `time` command:
+
+Below is the timing for the GNU version:
+
+```
+$ time find ~/src/go -type f | parallel md5sum
+... output elided ...
+parallel md5sum  61.22s user 44.63s system 286% cpu 36.896 total
+```
+
+Below is the timing for this version:
+
+```
+$ time find ~/src/go -type f | ./parallel md5sum
+... output elided ...
+./parallel md5sum  8.74s user 3.53s system 669% cpu 1.832 total
+```
+
+This represents a total execution time that is roughly 20x faster.
+
+A few notes on my test environment:
+
+- Intel Core i7 8700K
+- 64GB of RAM
+- 512GB Samsung 960 Pro NVMe SSD
+- Ubuntu 18.04 in WSL2 on Windows 10 Pro Insider Preview 19603.rs_prerelease.200403-1523
+
 ## TODO
 
 On both of my machines (One 6-core Core i7-8700K and one 4-core Ryzen 7 2700U)
