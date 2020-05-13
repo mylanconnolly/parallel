@@ -26,20 +26,12 @@ func shellParser(input string) []string {
 		gotWord     bool
 	)
 	for _, r := range input {
-		if escape {
+		switch {
+		case escape:
 			buf.WriteRune(r)
 			escape = false
 			continue
-		}
-		if r == '\\' {
-			if singleQuote {
-				buf.WriteRune(r)
-			} else {
-				escape = true
-			}
-			continue
-		}
-		if unicode.IsSpace(r) {
+		case unicode.IsSpace(r):
 			if singleQuote || doubleQuote {
 				buf.WriteRune(r)
 			} else if gotWord {
@@ -48,9 +40,14 @@ func shellParser(input string) []string {
 				gotWord = false
 			}
 			continue
-		}
-		switch r {
-		case '"':
+		case r == '\\':
+			if singleQuote {
+				buf.WriteRune(r)
+			} else {
+				escape = true
+			}
+			continue
+		case r == '"':
 			if !singleQuote {
 				if doubleQuote {
 					gotWord = true
@@ -58,7 +55,7 @@ func shellParser(input string) []string {
 				doubleQuote = !doubleQuote
 				continue
 			}
-		case '\'':
+		case r == '\'':
 			if !doubleQuote {
 				if singleQuote {
 					gotWord = true

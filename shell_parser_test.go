@@ -18,6 +18,7 @@ func TestShellParser(t *testing.T) {
 		{"\nsomething\nelse", []string{"something", "else"}},
 		{"\fsomething\felse", []string{"something", "else"}},
 		{`'\' " "`, []string{`\`, " "}},
+		{`\\`, []string{"\\"}},
 	}
 	for i, tt := range tests {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
