@@ -1,6 +1,6 @@
 # Parallel
 
-This is meant to be a replacement for GNU Parallel written in Go. This started
+This is meant to be a replacement for GNU parallel written in Go. This started
 as a learning exercise in dealing with parallelism in Go, but has since become
 a tool that I regularly use.
 
@@ -53,32 +53,36 @@ For more general information about Go templates, check
 
 ## Real world examples:
 
-Here are some benchmarks using the `time` command:
+Here are some benchmarks using the `time` command. The benchmark I put together
+is to run `md5sum` for every file in the Go source repository as of commit
+14bec27743.
 
 Below is the timing for the GNU version:
 
 ```
-$ time find ~/src/go -type f | parallel md5sum
+$ time find ~/src/go -type f | parallel md5sum > /dev/null
 ... output elided ...
-parallel md5sum  61.22s user 44.63s system 286% cpu 36.896 total
+parallel md5sum > /dev/null  22.70s user 43.62s system 239% cpu 27.667 total
 ```
 
 Below is the timing for this version:
 
 ```
-$ time find ~/src/go -type f | ./parallel md5sum
+$ time find ~/src/go -type f | ./parallel md5sum > /dev/null
 ... output elided ...
-./parallel md5sum  8.74s user 3.53s system 669% cpu 1.832 total
+./parallel md5sum > /dev/null  8.06s user 3.11s system 333% cpu 3.344 total
 ```
 
-This represents a total execution time that is roughly 20x faster.
+In this example it took GNU parallel around 8 times longer to complete the same
+amount of work.
 
 A few notes on my test environment:
 
-- Intel Core i7 8700K
-- 64GB of RAM
-- 512GB Samsung 960 Pro NVMe SSD
-- Ubuntu 18.04 in WSL2 on Windows 10 Pro Insider Preview 19603.rs_prerelease.200403-1523
+- Thinkpad A485
+- AMD Ryzen Pro 2700U
+- 16GB of RAM
+- 256GB NVMe SSD (though I believe it might be a pretty low-quality one)
+- Ubuntu 20.04 LTS (kernel version 5.4.0-21-generic)
 
 ## TODO
 
@@ -86,5 +90,5 @@ On both of my machines (One 6-core Core i7-8700K and one 4-core Ryzen 7 2700U)
 performance seems to peak at a concurrency level of 4. I would like to hunt down
 the cause of this bottleneck.
 
-GNU Parallel supports building pipelines in its templating language. I would
+GNU parallel supports building pipelines in its templating language. I would
 like to emulate this, but I feel like it would add a fair amount of complexity.
