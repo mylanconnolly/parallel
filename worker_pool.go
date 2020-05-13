@@ -90,14 +90,13 @@ func (w *WorkerPool) startWorker(wg *sync.WaitGroup) {
 		select {
 		case <-w.ctx.Done():
 			return
+		case line, open := <- w.queue.ch:
+			if !open {
+				return
+			}
+			w.runner(line)
 		default:
 		}
-		line, ok := w.queue.readLine()
-
-		if !ok {
-			break
-		}
-		w.runner(line)
 	}
 }
 

@@ -11,14 +11,11 @@ type queue struct {
 	ch <-chan string
 }
 
-func (q queue) readLine() (string, bool) {
-	str, more := <-q.ch
-	return str, more
-}
-
 func newQueue(reader io.Reader, splitChar byte, queueBuffer int) queue {
 	ch := make(chan string, queueBuffer*2) // Buffer the channel to a reasonable value
 
+	// Build the scanner and start scanning lines into the job queue in the
+	// background while we return our new queue.
 	go func() {
 		scanner := newScanner(reader, splitChar)
 
