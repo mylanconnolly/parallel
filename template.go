@@ -22,5 +22,14 @@ var tmplFuncs = template.FuncMap{
 	"basename":      filepath.Base,
 	"dirname":       filepath.Dir,
 	"ext":           filepath.Ext,
-	"basenameNoExt": func(str string) string { return strings.TrimSuffix(filepath.Base(str), filepath.Ext(str)) },
+	"noExt":         noExt,
+	"basenameNoExt": basenameNoExt,
+}
+
+func noExt(str string) string {
+	return strings.TrimSuffix(str, filepath.Ext(str))
+}
+
+func basenameNoExt(str string) string {
+	return filepath.Base(noExt(str))
 }

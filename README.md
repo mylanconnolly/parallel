@@ -27,9 +27,11 @@ Let's say you want to do something more complex... maybe you want to use some
 templating?
 
 ```shell
-# This will take every file in /etc and copies it with an extension of today's
-# date. (please don't run this command)
-$ find /etc -type f | parallel -t 'cp {{.Input}} {{.Input}}.{{.Start.Format "20060101"}}'
+# This will take every file in /etc and copies it to another file with the time
+# in the filename. For example:
+#
+# cp /etc/sysctl.conf /etc/sysctl.20200513.conf
+$ find /etc -type f | parallel -t 'cp {{.Input}} {{noExt .Input}}.{{.Start.Format "20060101"}}.{{ext .Input}}'
 ```
 
 Maybe you need to use an input file as your source:
@@ -41,12 +43,12 @@ parallel -a ./files.txt -t 'md5sum {{.Input}}'
 
 The following fields are available when using templates:
 
-| Field   | Definition                                                    |
-| :------ | :------------------------------------------------------------ |
-| `Cmd`   | The path of the command specified, for example echo or md5sum |
-| `Input` | The current input that we received via stdin or input file    |
-| `Start` | The time that parallel was started                            |
-| `Time`  | The time that the current operation began                     |
+| Field        | Definition                                                    |
+| :----------- | :------------------------------------------------------------ |
+| `{{.Cmd}}`   | The path of the command specified, for example echo or md5sum |
+| `{{.Input}}` | The current input that we received via stdin or input file    |
+| `{{.Start}}` | The time that parallel was started                            |
+| `{{.Time}}`  | The time that the current operation began                     |
 
 For more general information about Go templates, check
 [here](https://golang.org/pkg/text/template/#pkg-overview).
