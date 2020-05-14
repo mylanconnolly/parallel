@@ -59,7 +59,7 @@ func NewWorkerPool(
 		template:    parsedTmpl,
 	}
 	if tmpl != "" {
-		parsedTmpl, err = template.New("cmd").Parse(tmpl)
+		parsedTmpl, err = template.New("cmd").Funcs(tmplFuncs).Parse(tmpl)
 
 		if err != nil {
 			return nil, err
