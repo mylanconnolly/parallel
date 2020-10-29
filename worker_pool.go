@@ -60,10 +60,10 @@ func NewWorkerPool(
 	}
 	if tmpl != "" {
 		parsedTmpl, err = template.New("cmd").Funcs(tmplFuncs).Parse(tmpl)
-
 		if err != nil {
 			return nil, err
 		}
+
 		w.template = parsedTmpl
 		w.runner = w.runCmdTemplate
 	} else {
@@ -97,7 +97,6 @@ func (w *WorkerPool) startWorker(wg *sync.WaitGroup) {
 				return
 			}
 			w.runner(line)
-		default:
 		}
 	}
 }

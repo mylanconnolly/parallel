@@ -15,27 +15,18 @@ const (
 	delimNull    = byte('\x00')
 )
 
+const (
+	nullDelimHelp = `Use NUL as delimiter. Normally input lines will end in \n (newline). If they end in \0 (NUL), then use this option. It is useful for processing arguments that may contain \n (newline)`
+	argHelp       = `Use input-file as input source. Only one input source can be specified. In this case, stdin is discarded.`
+	jobHelp       = `Number of jobs to run; defaults to logical CPU core count.`
+	templateHelp  = `Specify a command template, which is used to override the default behavior of one command per line, with the line appended to the command and any positional arguments that exist`
+)
+
 func main() {
-	nullDelim := flag.Bool(
-		"0",
-		false,
-		"Use NUL as delimiter. Normally input lines will end in \\n (newline). If they end in \\0 (NUL), then use this option. It is useful for processing arguments that may contain \\n (newline)",
-	)
-	argFile := flag.String(
-		"a",
-		"",
-		"Use input-file as input source. Only one input source can be specified. In this case, stdin is discarded.",
-	)
-	jobs := flag.Int(
-		"j",
-		runtime.NumCPU(),
-		"Number of jobs to run; defaults to logical CPU core count.",
-	)
-	template := flag.String(
-		"t",
-		"",
-		"Specify a command template, which is used to override the default behavior of one command per line, with the line appended to the command and any positional arguments that exist",
-	)
+	nullDelim := flag.Bool("0", false, nullDelimHelp)
+	argFile := flag.String("a", "", argHelp)
+	jobs := flag.Int("j", runtime.NumCPU(), jobHelp)
+	template := flag.String("t", "", templateHelp)
 
 	flag.Parse()
 
@@ -82,21 +73,21 @@ func main() {
 	// Check for SIGINT and attempt to tell all jobs to cancel. If the user sends
 	// another SIGINT then just forcefully quit.
 	c := make(chan os.Signal, 1)
+
 	signal.Notify(c, os.Interrupt)
 
-	go func() {
-		<-c
-		cancel()
-		fmt.Fprintf(
-			os.Stderr,
-			"Caught SIGINT, exiting gracefully (send once more to exit immediately)\n",
-		)
-		<-c
-		os.Exit(130)
-	}()
+	go watchSigInt(c, cancel)
 
 	// Start the worker process.
 	w.run()
+}
+
+func watchSigInt(c chan os.Signal, cancel context.CancelFunc) {
+	<-c
+	cancel()
+	fmt.Fprintf(os.Stderr, "Caught SIGINT, exiting gracefully (send once more to exit immediately)\n")
+	<-c
+	os.Exit(130)
 }
 
 func getDelim(isNull bool) byte {

@@ -24,15 +24,8 @@ func TestQueueReadLine(t *testing.T) {
 
 			queue := newQueue(strings.NewReader(tt.input), tt.splitChar, 1)
 
-		loop:
-			for {
-				select {
-				case got, ok := <-queue.ch:
-					if !ok {
-						break loop
-					}
-					lines = append(lines, got)
-				}
+			for got := range queue.ch {
+				lines = append(lines, got)
 			}
 			if !reflect.DeepEqual(lines, tt.want) {
 				t.Fatalf("Got: %#v Want: %#v", lines, tt.want)

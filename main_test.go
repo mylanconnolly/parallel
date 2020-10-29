@@ -98,7 +98,7 @@ func benchmarkTmpl(b *testing.B, concurrency, wordLen, queueLen int, tmpl string
 func BenchmarkEchoEtcCmd(b *testing.B) {
 	for _, n := range []int{1, 2, 3, 4, 5, 6, 7, 8} {
 		b.Run(strconv.Itoa(n), func(b *testing.B) {
-			benchmarkCmd(b, n, 64, 1000, "echo")
+			benchmarkCmd(b, n, 64, 100, "echo")
 		})
 	}
 }
@@ -106,7 +106,7 @@ func BenchmarkEchoEtcCmd(b *testing.B) {
 func BenchmarkEtcTmpl(b *testing.B) {
 	for _, n := range []int{1, 2, 3, 4, 5, 6, 7, 8} {
 		b.Run(strconv.Itoa(n), func(b *testing.B) {
-			benchmarkTmpl(b, n, 64, 1000, "echo")
+			benchmarkTmpl(b, n, 64, 100, "echo")
 		})
 	}
 }

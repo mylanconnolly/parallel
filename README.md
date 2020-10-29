@@ -50,6 +50,31 @@ The following fields are available when using templates:
 | `{{.Start}}` | The time that parallel was started                            |
 | `{{.Time}}`  | The time that the current operation began                     |
 
+In addition, the following functions are available in templates:
+
+| Function       | Help                                   |
+| :------------- | :------------------------------------- |
+| `toUpper`      | Transform the string to uppercase      |
+| `toLower`      | Transform the string to lowercase      |
+| `absolutePath` | Get the absolute path of a filename    |
+| `basename`     | Get the basename of a file path        |
+| `dirname`      | Get the directory of a file path       |
+| `ext`          | Get the extension of a file            |
+| `noExt`        | Get the file path without an extension |
+
+Some examples below:
+
+```shell
+# Copy some files up a level
+parallel -a ./files.txt -t 'cp {{.Input}} {{.Input | dirname | dirname}}'
+
+# Create a directory named after the file (without extension)
+parallel -a ./files.txt -t 'mkdir -p {{.Input}} {{.Input | noExt}}'
+
+# Echo the base name of the file without the extension
+parallel -a ./files.txt -t 'mkdir -p {{.Input}} {{.Input | basename | noExt}}'
+```
+
 For more general information about Go templates, check
 [here](https://golang.org/pkg/text/template/#pkg-overview).
 
