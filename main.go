@@ -36,6 +36,7 @@ func main() {
 		"",
 		"Specify a command template, which is used to override the default behavior of one command per line, with the line appended to the command and any positional arguments that exist",
 	)
+
 	flag.Parse()
 
 	args := flag.Args()
@@ -44,22 +45,16 @@ func main() {
 		fmt.Fprintf(os.Stderr, "Must specify command to run or a template using the -t flag\n")
 		os.Exit(1)
 	}
-	delimMode := delimNewLine
 
-	if *nullDelim {
-		delimMode = delimNull
-	}
+	programArgs := getProgramArgs(args)
+	delimMode := getDelim(*nullDelim)
+
 	reader, err := getInput(*argFile)
-
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Problem getting input source: %s\n", err)
 		os.Exit(1)
 	}
-	var programArgs []string
 
-	if len(args) > 1 {
-		programArgs = args[1:]
-	}
 	cmd := getCmd(args)
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
@@ -68,6 +63,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "Must provide a command or command template")
 		os.Exit(1)
 	}
+
 	w, err := NewWorkerPool(
 		ctx,
 		os.Stdout,
@@ -103,6 +99,22 @@ func main() {
 	w.run()
 }
 
+func getDelim(isNull bool) byte {
+	if isNull {
+		return delimNull
+	}
+
+	return delimNewLine
+}
+
+func getProgramArgs(args []string) []string {
+	if len(args) > 1 {
+		return args[1:]
+	}
+
+	return []string{}
+}
+
 // If the args slice has at least one value then the first value would be the
 // command to run. If there isn't anything in it, then just return an empty
 // string. Presumably the template will be provided if there is no command.
@@ -110,6 +122,7 @@ func getCmd(args []string) string {
 	if len(args) > 0 {
 		return args[0]
 	}
+
 	return ""
 }
 
@@ -117,10 +130,12 @@ func getInput(argFile string) (io.Reader, error) {
 	if argFile == "" {
 		return os.Stdin, nil
 	}
+
 	stat, err := os.Stat(argFile)
 
 	if err != nil || stat.IsDir() {
 		return nil, fmt.Errorf("must specify a valid file path for -a option")
 	}
+
 	return os.Open(argFile)
 }
