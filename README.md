@@ -13,6 +13,8 @@ This tool is striving to only use stdlib packages.
 
 Install using `go get github.com/mylanconnolly/parallel` or some other means.
 
+### Simple usage
+
 The most straightforward usage would be:
 
 ```shell
@@ -23,23 +25,11 @@ $ find /etc -type f | parallel md5sum
 $ find /etc -type f | parallel -j 2 md5sum
 ```
 
-Let's say you want to do something more complex... maybe you want to use some
-templating?
+### Command templating
 
-```shell
-# This will take every file in /etc and copies it to another file with the time
-# in the filename. For example:
-#
-# cp /etc/sysctl.conf /etc/sysctl.20200513.conf
-$ find /etc -type f | parallel -t 'cp {{.Input}} {{noExt .Input}}.{{.Start.Format "20060101"}}.{{ext .Input}}'
-```
-
-Maybe you need to use an input file as your source:
-
-```shell
-# Maybe you want to calculate the MD5 sum of all the files in a text file.
-parallel -a ./files.txt -t 'md5sum {{.Input}}'
-```
+You can utilize Go templates when performing a command using the `-t` flag. When
+using the `-t` flag, you do not need to specify the command (it will be ignored
+if you do).
 
 The following fields are available when using templates:
 
@@ -65,20 +55,21 @@ In addition, the following functions are available in templates:
 Some examples below:
 
 ```shell
-# Copy some files up a level
+# Copy some files up a level (utilizing template pipelines).
 parallel -a ./files.txt -t 'cp {{.Input}} {{.Input | dirname | dirname}}'
 
-# Create a directory named after the file (without extension)
-parallel -a ./files.txt -t 'mkdir -p {{.Input}} {{.Input | noExt}}'
+# Create a directory named after the file (without extension).
+parallel -a ./files.txt -t 'mkdir -p {{.Input}} {{noExt .Input}}'
 
-# Echo the base name of the file without the extension
+# Echo the base name of the file without the extension (utilizing template
+# pipelines).
 parallel -a ./files.txt -t 'mkdir -p {{.Input}} {{.Input | basename | noExt}}'
 ```
 
 For more general information about Go templates, check
 [here](https://golang.org/pkg/text/template/#pkg-overview).
 
-## Real world examples:
+## Real world examples
 
 Here are some benchmarks using the `time` command. The benchmark I put together
 is to run `md5sum` for every file in the Go source repository as of commit
@@ -110,12 +101,3 @@ A few notes on my test environment:
 - 16GB of RAM
 - 256GB NVMe SSD (though I believe it might be a pretty low-quality one)
 - Ubuntu 20.04 LTS (kernel version 5.4.0-21-generic)
-
-## TODO
-
-On both of my machines (One 6-core Core i7-8700K and one 4-core Ryzen 7 2700U)
-performance seems to peak at a concurrency level of 4. I would like to hunt down
-the cause of this bottleneck.
-
-GNU parallel supports building pipelines in its templating language. I would
-like to emulate this, but I feel like it would add a fair amount of complexity.
